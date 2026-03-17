@@ -1,3 +1,5 @@
 psycopg2-binary
 groq
 python-dotenv
+fastapi
+uvicorn

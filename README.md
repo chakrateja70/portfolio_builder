@@ -4,70 +4,51 @@ A beginner-friendly student portfolio web app built with **plain Python**, **Neo
 
 ---
 
-## 🗂️ Project Structure
-
-```
-portfolio_builder/
-├── server/
-│   ├── server.py       ← Start the server from here
-│   ├── router.py       ← URL routing
-│   ├── auth.py         ← Register / Login / Sessions
-│   ├── profile.py      ← Profile CRUD (projects, skills, etc.)
-│   ├── ai_handler.py   ← Groq AI: Q&A + Personal Assistant
-│   ├── db.py           ← Database connection helper
-│   └── config.py       ← Loads .env variables
-├── migrations/
-│   └── migrate.py      ← Run once to create DB tables
-├── frontend/
-│   ├── register.html
-│   ├── login.html
-│   ├── profile.html
-│   ├── css/style.css
-│   └── js/
-│       ├── auth.js
-│       ├── profile.js
-│       └── ai.js
-├── .env                ← Put your API keys here
-└── requirements.txt
-```
-
----
-
 ## ⚙️ Setup Instructions
 
-### Step 1 — Install Python dependencies
+### 1. Prerequisites
+Ensure you have the following installed:
+- **Python 3.8+**
+- **Git**
+
+### 2. Clone and Install
 ```bash
+git clone https://github.com/chakrateja70/portfolio_builder
+cd portfolio_builder
 pip install -r requirements.txt
 ```
 
-### Step 2 — Configure your `.env` file
-Open `.env` and fill in:
-```
-DB_URL=postgresql://user:password@host/dbname?sslmode=require
+### 3. Environment Setup
+Create a `.env` file in the root `portfolio_builder/` directory with the following keys:
+```env
+# Database format: postgresql://user:password@host:port/dbname?sslmode=require
+DB_URL=your_neondb_connection_string
 GROQ_API_KEY=your_groq_api_key_here
-SECRET_KEY=any_random_string
+SECRET_KEY=any_secure_random_string_here
 ```
+> **Tip:** You can get `DB_URL` from [NeonDB](https://neon.tech) and `GROQ_API_KEY` from the [Groq Console](https://console.groq.com).
 
-- **DB_URL**: Get from [NeonDB](https://neon.tech) — copy the connection string
-- **GROQ_API_KEY**: Get from [Groq Console](https://console.groq.com)
-
-### Step 3 — Run the migration (create tables)
-```bash
-cd migrations
-python migrate.py
-```
-You should see: `✅ All tables created successfully!`
-
-### Step 4 — Start the server
+### 4. Database Migrations
+Before running the app, you need to create the necessary database tables. Run the migration script:
 ```bash
 cd server
-python server.py
+python migrate.py
+```
+*(If the script lives in a `migrations` folder, run `cd migrations && python migrate.py` instead).*
+If successful, you will see `✅ All tables created successfully!`.
+
+### 5. Running the Application
+The backend is powered by FastAPI and Uvicorn. Start the development server from the `server` directory:
+
+```bash
+cd server
+uvicorn main:app --reload
 ```
 
-### Step 5 — Open in browser
-```
-http://localhost:8080
-```
+### 6. View in Browser
+Once the server is running, open your browser and navigate to the frontend:
+- **Login/Registration:** Open `http://localhost:8000/login.html` (or `register.html`).
+*(Note: Because the app serves static HTML files, ensure you are accessing them through the FastAPI server route if configured, or via a Live Server extension if serving the frontend separately).*
 
 ---
 
