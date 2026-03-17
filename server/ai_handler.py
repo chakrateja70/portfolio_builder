@@ -49,9 +49,11 @@ def ask_question(user_question):
                 {
                     "role": "system",
                     "content": (
-                        "You are a helpful assistant for students building their portfolio. "
-                        "Help with career advice, resume tips, project ideas, and general coding questions. "
-                        "Keep answers clear and concise."
+                        "You are a helpful and professional career assistant for students. "
+                        "Provide clear, accurate, and insightful answers to their questions about "
+                        "coding, resume building, and project ideas. While being efficient, ensure "
+                        "your tone is supportive and encouraging. If providing code, explain it "
+                        "briefly so the user understands the logic."
                     )
                 },
                 {
@@ -59,7 +61,7 @@ def ask_question(user_question):
                     "content": user_question
                 }
             ],
-            max_tokens=500
+            
         )
         return response.choices[0].message.content.strip()
 
@@ -95,19 +97,37 @@ def parse_update_intent(user_prompt):
         dict with keys "field" and "new_value", or None if parsing failed
     """
     system_prompt = f"""
-You are a JSON extractor. The user wants to update their portfolio profile.
-Extract WHAT field they want to update and the NEW VALUE they want to set.
+        You are a JSON extractor for a portfolio builder app. The user wants to update their profile or add new items.
+        
+        Determine the ACTION ("update" for existing singleton fields, or "add" for lists like skills, experience, projects, achievements).
+        NOTE: Even if the user says "update my skill" or "add a skill", use the "add" action for skills, projects, experience, and achievements!
 
-Allowed fields: {", ".join(ALLOWED_FIELDS.keys())}
+        If action is "update":
+        Extract WHAT field they want to update and the NEW VALUE.
+        Allowed fields for "update": {", ".join(ALLOWED_FIELDS.keys())}
 
-Return ONLY a valid JSON object in this exact format:
-{{"field": "<field_name>", "new_value": "<new_value>"}}
+        If action is "add":
+        Extract the "table" (one of: "skills", "projects", "experience", "achievements") and the "data" object containing the fields.
+        - For skills: need "skill_name". Also extract "level" (Beginner, Intermediate, Expert). If user doesn't mention level, default to "Beginner".
+        - For projects: need "title". Optional: "description", "tech_stack", "project_url".
+        - For experience: need "company" and "role". Optional: "duration", "description".
+        - For achievements: need "title". Optional: "description", "date_earned".
 
-If you cannot understand the command, return:
-{{"field": null, "new_value": null}}
+        If required information is missing (e.g., trying to add experience without a company), return action as "missing_info" and put a helpful question in "message".
 
-Do NOT include any explanation or extra text. Only return the JSON.
-"""
+        Return ONLY a valid JSON object.
+        Examples:
+        {{"action": "update", "field": "name", "new_value": "Teja"}}
+        {{"action": "add", "table": "skills", "data": {{"skill_name": "Python", "level": "Beginner"}}}}
+        {{"action": "add", "table": "projects", "data": {{"title": "Chat App", "description": "Built with Python"}}}}
+        {{"action": "missing_info", "message": "What company was this experience at?"}}
+        
+        CRITICAL NEGATIVE EXAMPLE:
+        DO NOT map "update my llm skill" to {{"action": "update", "field": "name"}}. You MUST treat it as a skill addition: {{"action": "add", "table": "skills", "data": {{"skill_name": "llm", "level": "Beginner"}}}}
+        
+        If you cannot understand, return: {{"action": "unknown"}}
+        Do NOT include any explanation or extra text. Only return the JSON.
+    """
 
     try:
         response = client.chat.completions.create(
@@ -116,7 +136,7 @@ Do NOT include any explanation or extra text. Only return the JSON.
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            max_tokens=100
+
         )
         raw = response.choices[0].message.content.strip()
 
@@ -153,66 +173,109 @@ def run_personal_assistant(user_id, user_prompt):
     # Step 1: Parse intent using Groq
     intent = parse_update_intent(user_prompt)
 
-    if not intent or not intent.get("field") or not intent.get("new_value"):
-        return False, (
-            "Sorry, I couldn't understand that command. "
-            "Try something like: 'update my name to John' or 'set my github to https://github.com/john'"
-        )
+    if not intent or intent.get("action") == "unknown":
+        return False, "Sorry, I couldn't understand that command. Try something like 'add Python as a beginner skill' or 'update my name to John'."
 
-    field = intent["field"].lower().strip()
-    new_value = intent["new_value"].strip()
+    action = intent.get("action")
 
-    # Step 2: Validate field is allowed
-    if field not in ALLOWED_FIELDS:
-        return False, (
-            f"I can't update '{field}'. "
-            f"Allowed fields: {', '.join(ALLOWED_FIELDS.keys())}"
-        )
+    if action == "missing_info":
+        return False, intent.get("message", "Please provide more details.")
 
-    # Step 3: Validate the new value is not empty
-    if not new_value:
-        return False, "The new value cannot be empty."
+    if action == "update":
+        field = intent.get("field", "").lower().strip()
+        new_value = intent.get("new_value", "").strip()
 
-    # Extra validation for URLs
-    url_fields = ["github", "linkedin", "portfolio"]
-    if field in url_fields:
-        if not new_value.startswith("http"):
-            return False, f"Please provide a valid URL starting with http:// or https://"
+        # Validate field is allowed
+        if field not in ALLOWED_FIELDS:
+            return False, f"I can't update '{field}'. Allowed fields: {', '.join(ALLOWED_FIELDS.keys())}"
 
-    # Extra validation for phone number
-    if field == "phone":
-        digits_only = re.sub(r'\D', '', new_value)
-        if len(digits_only) < 7 or len(digits_only) > 15:
-            return False, "Please enter a valid phone number."
+        if not new_value:
+            return False, "The new value cannot be empty."
 
-    # Step 4: Get the correct table and column
-    table, column = ALLOWED_FIELDS[field]
+        # Extra validation for URLs
+        url_fields = ["github", "linkedin", "portfolio"]
+        if field in url_fields and not new_value.startswith(("http", "https", "www")):
+            return False, "Please provide a valid URL starting with http://, https://, or www."
 
-    # Step 5: Update database
-    try:
-        if table == "basic_details":
-            # Use INSERT ... ON CONFLICT to handle both new and existing rows
-            execute_query(
-                f"""
-                INSERT INTO basic_details (user_id, {column}, updated_at)
-                VALUES (%s, %s, NOW())
-                ON CONFLICT (user_id)
-                DO UPDATE SET {column} = EXCLUDED.{column}, updated_at = NOW()
-                """,
-                (user_id, new_value)
-            )
-        elif table == "links":
-            execute_query(
-                f"""
-                INSERT INTO links (user_id, {column}, updated_at)
-                VALUES (%s, %s, NOW())
-                ON CONFLICT (user_id)
-                DO UPDATE SET {column} = EXCLUDED.{column}, updated_at = NOW()
-                """,
-                (user_id, new_value)
-            )
+        # Extra validation for phone number
+        if field == "phone":
+            digits_only = re.sub(r'\D', '', new_value)
+            if len(digits_only) < 7 or len(digits_only) > 15:
+                return False, "Please enter a valid phone number."
 
-        return True, f"✅ Successfully updated your {field} to: {new_value}"
+        table, column = ALLOWED_FIELDS[field]
 
-    except Exception as e:
-        return False, f"Database error: {str(e)}"
+        try:
+            if table == "basic_details":
+                execute_query(
+                    f"INSERT INTO basic_details (user_id, {column}, updated_at) VALUES (%s, %s, NOW()) ON CONFLICT (user_id) DO UPDATE SET {column} = EXCLUDED.{column}, updated_at = NOW()",
+                    (user_id, new_value)
+                )
+            elif table == "links":
+                execute_query(
+                    f"INSERT INTO links (user_id, {column}, updated_at) VALUES (%s, %s, NOW()) ON CONFLICT (user_id) DO UPDATE SET {column} = EXCLUDED.{column}, updated_at = NOW()",
+                    (user_id, new_value)
+                )
+            return True, f"✅ Successfully updated your {field} to: {new_value}"
+
+        except Exception as e:
+            return False, f"Database error updating {field}: {str(e)}"
+
+    elif action == "add":
+        table = intent.get("table")
+        data = intent.get("data", {})
+
+        try:
+            if table == "skills":
+                skill_name = data.get("skill_name")
+                level = data.get("level", "Beginner").capitalize()
+                
+                # Make sure level is valid
+                if level not in ["Beginner", "Intermediate", "Expert"]:
+                    level = "Beginner"
+
+                execute_query(
+                    "INSERT INTO skills (user_id, skill_name, level) VALUES (%s, %s, %s)",
+                    (user_id, skill_name, level)
+                )
+                return True, f"✅ Added skill '{skill_name}' ({level})."
+
+            elif table == "projects":
+                title = data.get("title")
+                desc = data.get("description", "")
+                tech = data.get("tech_stack", "")
+                url = data.get("project_url", "")
+                execute_query(
+                    "INSERT INTO projects (user_id, title, description, tech_stack, project_url) VALUES (%s, %s, %s, %s, %s)",
+                    (user_id, title, desc, tech, url)
+                )
+                return True, f"✅ Added project '{title}'."
+
+            elif table == "experience":
+                company = data.get("company")
+                role = data.get("role")
+                duration = data.get("duration", "")
+                desc = data.get("description", "")
+                execute_query(
+                    "INSERT INTO experience (user_id, company, role, duration, description) VALUES (%s, %s, %s, %s, %s)",
+                    (user_id, company, role, duration, desc)
+                )
+                return True, f"✅ Added experience '{role}' at '{company}'."
+
+            elif table == "achievements":
+                title = data.get("title")
+                desc = data.get("description", "")
+                date_earned = data.get("date_earned", "")
+                execute_query(
+                    "INSERT INTO achievements (user_id, title, description, date_earned) VALUES (%s, %s, %s, %s)",
+                    (user_id, title, desc, date_earned)
+                )
+                return True, f"✅ Added achievement '{title}'."
+            else:
+                 return False, f"Cannot add to table '{table}'."
+            
+        except Exception as e:
+            return False, f"Database error adding {table}: {str(e)}"
+    
+    else:
+        return False, "Unsupported action."
