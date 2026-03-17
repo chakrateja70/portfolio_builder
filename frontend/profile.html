@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile - Portfolio Builder</title>
+  <meta name="description" content="Update your student portfolio profile" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="profile-layout">
+
+  <!-- ─── Sidebar Navigation ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>📁 Portfolio Builder</h2>
+      <p id="sidebarUsername">Loading...</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="#" class="nav-link active" data-section="basic">
+        <span class="nav-icon">👤</span> Basic Details
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="projects">
+        <span class="nav-icon">🚀</span> Projects
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="experience">
+        <span class="nav-icon">💼</span> Experience
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="skills">
+        <span class="nav-icon">⚡</span> Skills
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="achievements">
+        <span class="nav-icon">🏆</span> Achievements
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="links">
+        <span class="nav-icon">🔗</span> Links
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="ai">
+        <span class="nav-icon">🤖</span> AI Assistant
+      </a></li>
+    </ul>
+
+    <div class="sidebar-bottom">
+      <button class="btn btn-secondary btn-sm" id="logoutBtn" style="width:100%">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─── Main Content ───────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <div class="topbar">
+      <h1 id="sectionTitle">Basic Details</h1>
+      <div class="user-info">
+        Logged in as <strong id="topUsername">...</strong>
+      </div>
+    </div>
+
+    <!-- === BASIC DETAILS SECTION === -->
+    <div id="section-basic" class="section active">
+      <div class="section-header">
+        <h2>Basic Details</h2>
+      </div>
+      <form id="basicForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" placeholder="Your full name" />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" placeholder="+91 9876543210" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input type="text" id="location" placeholder="City, Country" />
+        </div>
+        <div class="form-group">
+          <label for="bio">Short Bio</label>
+          <textarea id="bio" placeholder="Tell recruiters about yourself in 2-3 sentences..."></textarea>
+        </div>
+        <div id="basicAlert" class="alert"></div>
+        <button type="submit" class="btn btn-primary" style="width:auto;padding:10px 28px">
+          Save Details
+        </button>
+      </form>
+    </div>
+
+    <!-- === PROJECTS SECTION === -->
+    <div id="section-projects" class="section">
+      <div class="section-header">
+        <h2>Projects</h2>
+        <button class="btn btn-secondary btn-sm" id="toggleProjectForm">+ Add Project</button>
+      </div>
+      <div id="projectsList"></div>
+      <div class="add-form" id="projectForm">
+        <div class="form-group">
+          <label>Project Title *</label>
+          <input type="text" id="proj_title" placeholder="e.g. Student Portfolio Builder" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="proj_desc" placeholder="What does this project do?"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tech Stack</label>
+            <input type="text" id="proj_tech" placeholder="Python, HTML, CSS" />
+          </div>
+          <div class="form-group">
+            <label>Project URL</label>
+            <input type="url" id="proj_url" placeholder="https://github.com/..." />
+          </div>
+        </div>
+        <div id="projectAlert" class="alert"></div>
+        <button class="btn btn-success btn-sm" id="saveProjectBtn">Save Project</button>
+      </div>
+    </div>
+
+    <!-- === EXPERIENCE SECTION === -->
+    <div id="section-experience" class="section">
+      <div class="section-header">
+        <h2>Experience</h2>
+        <button class="btn btn-secondary btn-sm" id="toggleExpForm">+ Add Experience</button>
+      </div>
+      <div id="experienceList"></div>
+      <div class="add-form" id="expForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company *</label>
+            <input type="text" id="exp_company" placeholder="Google, Startup XYZ, etc." />
+          </div>
+          <div class="form-group">
+            <label>Role *</label>
+            <input type="text" id="exp_role" placeholder="Software Intern, Web Developer" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Duration</label>
+          <input type="text" id="exp_duration" placeholder="Jan 2024 - Mar 2024" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="exp_desc" placeholder="What did you do there?"></textarea>
+        </div>
+        <div id="expAlert" class="alert"></div>
+        <button class="btn btn-success btn-sm" id="saveExpBtn">Save Experience</button>
+      </div>
+    </div>
+
+    <!-- === SKILLS SECTION === -->
+    <div id="section-skills" class="section">
+      <div class="section-header">
+        <h2>Skills</h2>
+        <button class="btn btn-secondary btn-sm" id="toggleSkillForm">+ Add Skill</button>
+      </div>
+      <div id="skillsList"></div>
+      <div class="add-form" id="skillForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Skill Name *</label>
+            <input type="text" id="skill_name" placeholder="Python, React, SQL..." />
+          </div>
+          <div class="form-group">
+            <label>Level</label>
+            <select id="skill_level">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+        </div>
+        <div id="skillAlert" class="alert"></div>
+        <button class="btn btn-success btn-sm" id="saveSkillBtn">Add Skill</button>
+      </div>
+    </div>
+
+    <!-- === ACHIEVEMENTS SECTION === -->
+    <div id="section-achievements" class="section">
+      <div class="section-header">
+        <h2>Achievements</h2>
+        <button class="btn btn-secondary btn-sm" id="toggleAchForm">+ Add Achievement</button>
+      </div>
+      <div id="achievementsList"></div>
+      <div class="add-form" id="achForm">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="ach_title" placeholder="Hackathon Winner, AWS Certification..." />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="ach_desc" placeholder="More details about this achievement"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="text" id="ach_date" placeholder="March 2024" />
+        </div>
+        <div id="achAlert" class="alert"></div>
+        <button class="btn btn-success btn-sm" id="saveAchBtn">Save Achievement</button>
+      </div>
+    </div>
+
+    <!-- === LINKS SECTION === -->
+    <div id="section-links" class="section">
+      <div class="section-header">
+        <h2>Social & Portfolio Links</h2>
+      </div>
+      <form id="linksForm">
+        <div class="form-group">
+          <label for="github_url">🐙 GitHub</label>
+          <input type="url" id="github_url" placeholder="https://github.com/yourusername" />
+        </div>
+        <div class="form-group">
+          <label for="linkedin_url">💼 LinkedIn</label>
+          <input type="url" id="linkedin_url" placeholder="https://linkedin.com/in/yourname" />
+        </div>
+        <div class="form-group">
+          <label for="portfolio_url">🌐 Portfolio Website</label>
+          <input type="url" id="portfolio_url" placeholder="https://yoursite.com" />
+        </div>
+        <div class="form-group">
+          <label for="other_url">🔗 Other Link</label>
+          <input type="url" id="other_url" placeholder="Any other link" />
+        </div>
+        <div id="linksAlert" class="alert"></div>
+        <button type="submit" class="btn btn-primary" style="width:auto;padding:10px 28px">
+          Save Links
+        </button>
+      </form>
+    </div>
+
+    <!-- === AI ASSISTANT SECTION === -->
+    <div id="section-ai" class="section">
+      <div class="section-header">
+        <h2>🤖 AI Assistant</h2>
+      </div>
+
+      <!-- Tab Toggle: Q&A or Personal Assistant -->
+      <div class="ai-mode-tabs">
+        <button class="ai-tab active" id="tabQA" onclick="switchAIMode('qa')">
+          💬 Q&amp;A Chat
+        </button>
+        <button class="ai-tab" id="tabAssist" onclick="switchAIMode('assist')">
+          ✨ Personal Assistant
+        </button>
+      </div>
+
+      <!-- Q&A Mode -->
+      <div id="qaMode">
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:12px">
+          Ask anything — career tips, resume advice, project ideas, coding questions.
+        </p>
+        <div class="ai-chat-box" id="qaChat"></div>
+        <div class="ai-input-row">
+          <input type="text" id="qaInput" placeholder="Ask a question..." />
+          <button class="btn btn-primary btn-sm" id="qaBtn" onclick="sendQAMessage()"
+            style="white-space:nowrap">Send</button>
+        </div>
+      </div>
+
+      <!-- Personal Assistant Mode -->
+      <div id="assistMode" style="display:none">
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:12px">
+          Update your profile using plain English. Examples:<br/>
+          <em>"update my name to Teja"</em> &nbsp;·&nbsp;
+          <em>"set my github to https://github.com/teja"</em> &nbsp;·&nbsp;
+          <em>"change my location to Hyderabad"</em>
+        </p>
+        <div class="ai-chat-box" id="assistChat"></div>
+        <div class="ai-input-row">
+          <input type="text" id="assistInput" placeholder='Try: "update my name to Teja"' />
+          <button class="btn btn-primary btn-sm" id="assistBtn" onclick="sendAssistMessage()"
+            style="white-space:nowrap">Run</button>
+        </div>
+      </div>
+
+    </div>
+    <!-- end sections -->
+
+  </main>
+  <!-- end main-content -->
+
+</div>
+<!-- end profile-layout -->
+
+<script src="/js/profile.js"></script>
+<script src="/js/ai.js"></script>
+
+</body>
+</html>
