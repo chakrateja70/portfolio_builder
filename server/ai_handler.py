@@ -216,7 +216,7 @@ def run_personal_assistant(user_id, user_prompt):
                     f"INSERT INTO links (user_id, {column}, updated_at) VALUES (%s, %s, NOW()) ON CONFLICT (user_id) DO UPDATE SET {column} = EXCLUDED.{column}, updated_at = NOW()",
                     (user_id, new_value)
                 )
-            return True, f"✅ Successfully updated your {field} to: {new_value}"
+            return True, f"Successfully updated your {field} to: {new_value}"
 
         except Exception as e:
             return False, f"Database error updating {field}: {str(e)}"
@@ -238,7 +238,7 @@ def run_personal_assistant(user_id, user_prompt):
                     "INSERT INTO skills (user_id, skill_name, level) VALUES (%s, %s, %s)",
                     (user_id, skill_name, level)
                 )
-                return True, f"✅ Added skill '{skill_name}' ({level})."
+                return True, f"Added skill '{skill_name}' ({level})."
 
             elif table == "projects":
                 title = data.get("title")
@@ -249,7 +249,7 @@ def run_personal_assistant(user_id, user_prompt):
                     "INSERT INTO projects (user_id, title, description, tech_stack, project_url) VALUES (%s, %s, %s, %s, %s)",
                     (user_id, title, desc, tech, url)
                 )
-                return True, f"✅ Added project '{title}'."
+                return True, f"Added project '{title}'."
 
             elif table == "experience":
                 company = data.get("company")
@@ -260,7 +260,7 @@ def run_personal_assistant(user_id, user_prompt):
                     "INSERT INTO experience (user_id, company, role, duration, description) VALUES (%s, %s, %s, %s, %s)",
                     (user_id, company, role, duration, desc)
                 )
-                return True, f"✅ Added experience '{role}' at '{company}'."
+                return True, f"Added experience '{role}' at '{company}'."
 
             elif table == "achievements":
                 title = data.get("title")
@@ -270,7 +270,7 @@ def run_personal_assistant(user_id, user_prompt):
                     "INSERT INTO achievements (user_id, title, description, date_earned) VALUES (%s, %s, %s, %s)",
                     (user_id, title, desc, date_earned)
                 )
-                return True, f"✅ Added achievement '{title}'."
+                return True, f"Added achievement '{title}'."
             else:
                  return False, f"Cannot add to table '{table}'."
             
