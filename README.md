@@ -8,7 +8,7 @@ A beginner-friendly student portfolio web app built with **plain Python**, **Neo
 
 ### 1. Prerequisites
 Ensure you have the following installed:
-- **Python 3.8+**
+- **Python 3.11**
 - **Git**
 
 ### 2. Clone and Install
@@ -24,14 +24,14 @@ Create a `.env` file in the root `portfolio_builder/` directory with the followi
 # Database format: postgresql://user:password@host:port/dbname?sslmode=require
 DB_URL=your_neondb_connection_string
 GROQ_API_KEY=your_groq_api_key_here
-SECRET_KEY=any_secure_random_string_here
+SECRET_KEY=any_secure_random_string_here (optional to change)
 ```
 > **Tip:** You can get `DB_URL` from [NeonDB](https://neon.tech) and `GROQ_API_KEY` from the [Groq Console](https://console.groq.com).
 
 ### 4. Database Migrations
 Before running the app, you need to create the necessary database tables. Run the migration script:
 ```bash
-cd server
+cd migrations
 python migrate.py
 ```
 *(If the script lives in a `migrations` folder, run `cd migrations && python migrate.py` instead).*
