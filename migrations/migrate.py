@@ -116,29 +116,12 @@ CREATE TABLE IF NOT EXISTS links (
 """
 
 
-# Drop order matters: child tables first, then parent tables
-DROP_TABLES_SQL = """
-DROP TABLE IF EXISTS links        CASCADE;
-DROP TABLE IF EXISTS achievements CASCADE;
-DROP TABLE IF EXISTS skills       CASCADE;
-DROP TABLE IF EXISTS experience   CASCADE;
-DROP TABLE IF EXISTS projects     CASCADE;
-DROP TABLE IF EXISTS basic_details CASCADE;
-DROP TABLE IF EXISTS sessions     CASCADE;
-DROP TABLE IF EXISTS users        CASCADE;
-"""
-
-
 def run_migration():
     print("Connecting to NeonDB...")
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
-        print("Dropping old tables (if any)...")
-        cursor.execute(DROP_TABLES_SQL)
-        conn.commit()
-
         print("Creating tables...")
         cursor.execute(CREATE_TABLES_SQL)
         conn.commit()
